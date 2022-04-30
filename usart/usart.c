@@ -28,6 +28,9 @@ void USART_Config(void)
     USART_InitStruct.USART_WordLength = USART_WordLength_8b;
     USART_Init(DEBUG_USART_X, &USART_InitStruct);
 
+    NVIC_Config();
+    USART_ITConfig(DEBUG_USART_X, USART_IT_RXNE, ENABLE);
+
     USART_Cmd(DEBUG_USART_X, ENABLE);                                           // 开启USART工作时钟
 
 }
@@ -71,5 +74,20 @@ int fgetc(FILE *f)
     while(USART_GetFlagStatus(DEBUG_USART_X, USART_FLAG_RXNE) == RESET);
 
     return (int)USART_ReceiveData(DEBUG_USART_X);
+}
+/*------------------------------------------------------------------------------------------------------------------------*/
+//中断服务控制
+static void NVIC_Config(void)
+{
+    NVIC_InitTypeDef    NVIC_InitStruct;
+
+    NVIC_PriorityGroupConfig(NVIC_USART_PriorityGroup);
+
+    NVIC_InitStruct.NVIC_IRQChannel = NVIC_USART_IRQ;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+
+    NVIC_Init(&NVIC_InitStruct);
 }
 
